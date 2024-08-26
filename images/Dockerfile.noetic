@@ -1,0 +1,82 @@
+# Source the correct base image
+FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-development-ari-30-dev
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set the environment variables for the nvidia runtime if creating container using nvidia-docker
+# ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+
+# Arguments for the user of the container - these options have to be passed when building the image
+ARG USERNAME
+ARG USERID
+ARG GROUPID
+
+## Install necessary software to build packages
+RUN apt-get update && apt-get install -y \
+    python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
+    python3-rosdep \
+    build-essential
+
+## Install software that is useful
+RUN apt-get update && apt-get install -y \
+    nano \
+    vim \
+    git
+    
+## Install dependencies for sw stack (this should move to a script)
+RUN apt install -y \
+    ros-noetic-hri \
+    ros-noetic-hri-msgs \
+    ros-noetic-hri-rviz \
+    ros-noetic-human-description \
+    ros-noetic-pyhri \
+    python -m pip \
+    python3-tk \
+    pal-gallium-pal-presentation-msgs
+
+## Install python dependencies (this should move to a script)
+RUN pip3 install py_trees ikpy google-api-python-client mediapipe
+
+# Intel: install Mesa libraries
+RUN apt-get update && \
+    apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN rosdep init
+
+## Setup the users
+
+# Properly setup the root password so that we have control to log in
+RUN echo "root:root" | chpasswd
+
+# Create the user and set it up
+RUN userdel user
+RUN groupadd -g $GROUPID -o $USERNAME
+RUN useradd -m -u $USERID -g $GROUPID -o -s /bin/bash $USERNAME
+RUN echo "$USERNAME:passwd" | chpasswd
+RUN adduser $USERNAME sudo
+
+# Add user to sudoers with no password prompt
+RUN usermod -aG sudo $USERNAME
+RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+## Setup the entrypoint
+RUN echo "source /opt/ros/noetic/setup.bash" >> /home/$USERNAME/.bashrc
+RUN echo "PS1=\"(noetic) \$PS1\"" >> /home/$USERNAME/.bashrc
+RUN echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
+COPY bash_convenience /home/$USERNAME/.bash_convenience
+
+# Change to the user to run non-root tasks
+USER $USERNAME
+
+# Update rosdep now that we are not in root
+RUN rosdep update
+
+# Setup the workspace
+WORKDIR "/home/$USERNAME"
+RUN mkdir -p catkin_ws/src
+RUN mkdir bridge

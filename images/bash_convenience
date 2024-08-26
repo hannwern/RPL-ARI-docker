@@ -1,0 +1,14 @@
+export ROS_IP=$(hostname -I | awk '{ print $1 }')
+
+ros_master() {
+    export ROS_MASTER_URI="http://$ROS_IP:11311"
+    echo "The ROS Master for this terminal is now this computer ($ROS_MASTER_URI)"
+}
+
+ros_slave() {
+    ROS_MASTER=$1
+    export ROS_MASTER_URI="http://$ROS_MASTER:11311"
+    echo "The ROS Master for this terminal is now $ROS_MASTER ($ROS_MASTER_URI)"
+}
+
+ros_master

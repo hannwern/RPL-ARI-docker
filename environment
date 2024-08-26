@@ -1,0 +1,65 @@
+create_image() {
+    ROS_VERSION=$1
+    SCRIPT_PATH=$(cd "$(dirname ${BASH_SOURCE[0]})"; pwd -P)
+    if [ "$(docker images | grep rpl-ari-$ROS_VERSION)" ]; then
+        docker rmi rpl-ari-$ROS_VERSION
+    fi
+    docker build -t rpl-ari-$ROS_VERSION --build-arg USERNAME=$USER --build-arg USERID=$UID --build-arg GROUPID=$(id -g) -f $SCRIPT_PATH/images/Dockerfile.$ROS_VERSION $SCRIPT_PATH/images
+}
+
+start_container () {
+    CONTAINER_NAME=$1
+    if [ ! "$(docker ps | grep $CONTAINER_NAME)" ]; then
+        docker start $CONTAINER_NAME
+    fi
+}
+
+close_container () {
+    CONTAINER_NAME=$1
+    docker stop $CONTAINER_NAME
+}
+
+open_terminal () {
+    CONTAINER_NAME=$1
+    xhost +
+    docker exec -it $CONTAINER_NAME env TERM=xterm-256color /bin/bash
+}
+
+make_container () {
+    ROS_VERSION=$1
+    CONTAINER_NAME=$2
+    SOURCE_FOLDER=$3
+    BRIDGE_FOLDER=$4
+    create_image $ROS_VERSION
+    xhost +
+
+    # Create container using Nvidia
+    # docker run --runtime=nvidia --gpus=all --net=host -i -t -d \
+    #     -e DISPLAY \
+    #     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    #     -v $SOURCE_FOLDER:/home/$USER/catkin_ws/src \
+    #     -v $BRIDGE_FOLDER:/home/$USER/bridge \
+    #     --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
+
+    # Create container using Intel
+    docker run \
+        --privileged --net=host -i -t -d \
+        --volume=/tmp/.X11-unix:/tmp/.X11-unix \
+        --device=/dev/dri:/dev/dri \
+        --env="DISPLAY=$DISPLAY" \
+        --env="DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS" \
+        --volume=/run/user/$(id -u)/bus:/run/user/$(id -u)/bus \
+        --volume=$SOURCE_FOLDER:/home/$USER/catkin_ws/src \
+        --volume=$BRIDGE_FOLDER:/home/$USER/bridge \
+        --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
+
+    close_container $CONTAINER_NAME
+}
+
+delete_container () {
+    CONTAINER_NAME=$1
+    if [ "$(docker ps | grep $CONTAINER_NAME)" ]; then
+        close_container $CONTAINER_NAME
+    fi
+    docker rm $CONTAINER_NAME
+}
