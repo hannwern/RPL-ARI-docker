@@ -24,13 +24,16 @@ cd RPL-ARI-docker
 echo "source $(pwd)/environment" >> ~/.bashrc
 ```
 
+The environment and docker files are default using Intel GPUs. If you have an Nvidia GPU, you can change the `Dockerfile` and `environment` file to use this instead. In the docker file line 8 was commented out, and line 45-47 was added. In the environment file the “docker run …” for Nvidia is commented out and the command for Intel is active. 
+
+
 Close & open a new terminal. The main idea now is that you can create a container that will mount one of the folders in your computer to the `src` folder of a catkin workspace in the container, and another of your folders to a folder I call `bridge` so that you can move files in and out of the container easily.
 
 I suggest you try this out by running (I'm using gallium here, but just change it for the other ones if that's what you need):
 ```
-cd dir/where/you/want/to/put/the/container
-mkdir -p noetic-container/src noetic-container/bridge
-make_container gallium container-name ~/path/to/code ~/path/to/bridge
+cd ~
+mkdir -p container-name-container/src container-name-container/bridge
+make_container gallium container-name ~/container-name-container/src ~/container-name-container/bridge
 ```
 
 You only have to run `make_container` the first time (minus if your container gets ruined, more on that later). From then on, to start it up again just run `start_container`:
@@ -96,8 +99,21 @@ For the hackathon the masters will likely either be the ARI or the YuMi's contro
 
 ## What's in the container
 
-ROS and little else. I made sure there's also a text editor (nano/vim) and git. Things you should install yourself via `apt`. 
+ROS and little else. I made sure there's also a text editor (nano/vim) and git. Feel free to add other thongs you might need.
 
-If you run a sudo command, the password is `passwd`. If you find yourself in the root user for some reason, the password is `root`. 
-EDIT: I removed the need for a password for sudo commands.
+If you run a sudo command, the password is `passwd`. If you find yourself in the root user for some reason, the password is `root`. EDIT: I removed the need for a password for sudo commands.
 
+
+
+
+## Troubleshooting
+
+1. Rviz might give a dbus error. If it does, run the following command in the terminal you're running Rviz in:
+```
+DBUS_SESSION_BUS_ADDRESS=/dev/null rosrun rviz rviz -d `rospack find ari_2dnav`/config/rviz/navigation.rviz
+```
+
+2. Try docker with Intel GPU. Then run 
+```
+DBUS_SESSION_BUS_ADDRESS=/dev/null rosrun rviz rviz -d `rospack find ari_2dnav`/config/rviz/navigation.rviz
+```
