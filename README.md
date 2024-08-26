@@ -13,7 +13,7 @@ This is all aimed at Linux. Probably Ubuntu, since that's what I tested[^*].
 
 ## How to use this
 
-Clone the repository:
+Clone the repository to your computer:
 ```
 git clone https://github.com/hannwern/RPL-ARI-docker.git
 ```
@@ -24,41 +24,42 @@ cd RPL-ARI-docker
 echo "source $(pwd)/environment" >> ~/.bashrc
 ```
 
-Close & open a new terminal. The main idea now is that you can create one container for each version of ROS. Each containers will mount one of your folders to the `src` folder of a catkin workspace and another of your folders to a folder I call `bridge` so that you can move files in and out of the container easily.
+Close & open a new terminal. The main idea now is that you can create a container that will mount one of the folders in your computer to the `src` folder of a catkin workspace in the container, and another of your folders to a folder I call `bridge` so that you can move files in and out of the container easily.
 
 I suggest you try this out by running (I'm using gallium here, but just change it for the other ones if that's what you need):
 ```
-cd ~
+cd dir/where/you/want/to/put/the/container
 mkdir -p noetic-container/src noetic-container/bridge
-make_container noetic ~/noetic-container/src ~/noetic-container/bridge
-start_container noetic
-open_terminal noetic
+make_container gallium container-name ~/path/to/code ~/path/to/bridge
 ```
 
-Now you'll be in a terminal inside your noetic container. If you need more terminals, just open more terminals and run `open_terminal noetic`. Anything you do to the `catkin_ws/src` and `bridge` folders in the containers is also always available to you in your own folders `noetic-container/src` and `noetic-container/bridge`, so you can run your editor of choice outside the Docker and just use the terminals to compile things.
-
-If you want to connect your editor to the container for something like debugging, I can vouch for VSCode for Python. Guide for setup is [here](https://code.visualstudio.com/docs/devcontainers/tutorial).
-
-To stop a container, run:
-```
-close_container noetic
-```
 You only have to run `make_container` the first time (minus if your container gets ruined, more on that later). From then on, to start it up again just run `start_container`:
 ```
 start_container noetic
 open_terminal noetic
 ```
 
+Now you'll be in a terminal inside your container. If you need more terminals, just open more terminals and run `open_terminal container-name`. 
+
+Anything you do to the `catkin_ws/src` and `bridge` folders in the container is also always available to you in your own folders `noetic-container/src` and `noetic-container/bridge`, and vice versa. Therfore you can run your editor of choice outside the Docker and just use the terminals to compile things.
+
 **SUPER MEGA WARNING**: The connection between the `src` folders and the `bridge` folders in your computer and in your container is total. **Any** change you make, regardless of it's on the container or your computer, happens on both. Something you delete is gone from both sides.
 
-### CUDA/Torch/Python versions/etc. went wrong
-If you've irreparably damaged your container by installing/uninstalling things you don't really want, you can delete it and create a new one:
-```
-delete_container noetic
-make_container noetic ~/noetic-container/src ~/noetic-container/bridge
-```
 
 **WARNING**: Only the folders `catkin_ws/src` and `bridge` are safe, since mounted outside the container. Anything else that is not in these folders is lost by deleting the container, so be careful when doing this that you've saved everything you don't want to lose in one of these folders.
+
+
+To stop a container, run:
+```
+close_container container-name
+```
+
+To delete a container, run:
+```
+delete_container container-name
+```
+
+
 
 ## Configure your hosts file
 
@@ -95,8 +96,8 @@ For the hackathon the masters will likely either be the ARI or the YuMi's contro
 
 ## What's in the container
 
-ROS and little else. I made sure there's also a text editor (nano/vim) and git. Things you should install yourself via `apt`. If you run a sudo command, the password is `passwd`. If you find yourself in the root user for some reason, the password is `root`.
+ROS and little else. I made sure there's also a text editor (nano/vim) and git. Things you should install yourself via `apt`. 
 
-## What's missing?
+If you run a sudo command, the password is `passwd`. If you find yourself in the root user for some reason, the password is `root`. 
+EDIT: I removed the need for a password for sudo commands.
 
-Graphics only work with X11 and if you have Wayland the comands break. If you get an error with something related to `/tmp/.X11`, talk to me.
