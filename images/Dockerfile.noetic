@@ -34,12 +34,14 @@ RUN apt install -y \
     ros-noetic-hri-rviz \
     ros-noetic-human-description \
     ros-noetic-pyhri \
+    libopencv-dev \
     python -m pip \
     python3-tk \
     pal-gallium-pal-presentation-msgs
 
 ## Install python dependencies (this should move to a script)
 RUN pip3 install py_trees ikpy google-api-python-client mediapipe
+RUN pip3 install opencv-python
 
 # Intel: install Mesa libraries
 RUN apt-get update && \

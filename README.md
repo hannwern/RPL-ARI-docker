@@ -24,7 +24,7 @@ cd RPL-ARI-docker
 echo "source $(pwd)/environment" >> ~/.bashrc
 ```
 
-The environment and docker files are default using Intel GPUs. If you have an Nvidia GPU, you can change the `Dockerfile` and `environment` file to use this instead. In the docker file line 8 was commented out, and line 45-47 was added. In the environment file the “docker run …” for Nvidia is commented out and the command for Intel is active. 
+If you have an Nvidia GPU, you can change the `Dockerfile` and `environment` file to use these. In the docker file line 8 was commented out, and line 45-47 was added. In the environment file the “docker run …” for Nvidia is commented out. 
 
 
 Close & open a new terminal. The main idea now is that you can create a container that will mount one of the folders in your computer to the `src` folder of a catkin workspace in the container, and another of your folders to a folder I call `bridge` so that you can move files in and out of the container easily.
@@ -113,7 +113,4 @@ If you run a sudo command, the password is `passwd`. If you find yourself in the
 DBUS_SESSION_BUS_ADDRESS=/dev/null rosrun rviz rviz -d `rospack find ari_2dnav`/config/rviz/navigation.rviz
 ```
 
-2. Try docker with Intel GPU. Then run 
-```
-DBUS_SESSION_BUS_ADDRESS=/dev/null rosrun rviz rviz -d `rospack find ari_2dnav`/config/rviz/navigation.rviz
-```
+2. Try creating container without Nvidia. Then try step 1
