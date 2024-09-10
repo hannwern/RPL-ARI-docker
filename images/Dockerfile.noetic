@@ -34,6 +34,7 @@ RUN apt install -y \
     ros-noetic-hri-rviz \
     ros-noetic-human-description \
     ros-noetic-pyhri \
+    ros-noetic-audio-common-msgs \
     libopencv-dev \
     python -m pip \
     python3-tk \
