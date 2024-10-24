@@ -33,23 +33,23 @@ make_ari_container () {
     create_ari_image $ROS_VERSION
     
     # Create container using Nvidia
-    # docker run --runtime=nvidia --gpus=all --net=host -i -t -d \
-    #     -e DISPLAY \
-    #     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    #     -v $SOURCE_FOLDER:/home/$USER/catkin_ws/src \
-    #     -v $BRIDGE_FOLDER:/home/$USER/bridge \
-    #     --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
+    docker run --runtime=nvidia --gpus=all --net=host -i -t -d \
+        -e DISPLAY \
+        -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+        -v $SOURCE_FOLDER:/home/$USER/catkin_ws/src \
+        -v $BRIDGE_FOLDER:/home/$USER/bridge \
+        --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
 
     # Create container using Intel
-    xhost +
-    docker run \
-        --privileged --net=host -i -t -d \
-        --volume=/tmp/.X11-unix:/tmp/.X11-unix \
-        --device=/dev/dri:/dev/dri \
-        --env="DISPLAY=$DISPLAY" \
-        --volume=$SOURCE_FOLDER:/home/$USER/catkin_ws/src \
-        --volume=$BRIDGE_FOLDER:/home/$USER/bridge \
-        --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
+    # xhost +
+    # docker run \
+    #     --privileged --net=host -i -t -d \
+    #     --volume=/tmp/.X11-unix:/tmp/.X11-unix \
+    #     --device=/dev/dri:/dev/dri \
+    #     --env="DISPLAY=$DISPLAY" \
+    #     --volume=$SOURCE_FOLDER:/home/$USER/catkin_ws/src \
+    #     --volume=$BRIDGE_FOLDER:/home/$USER/bridge \
+    #     --name $CONTAINER_NAME rpl-ari-$ROS_VERSION /bin/bash
 
     close_ari_container $CONTAINER_NAME
 }

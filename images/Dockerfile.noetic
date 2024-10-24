@@ -4,7 +4,7 @@ FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-d
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the environment variables for the nvidia runtime if creating container using nvidia-docker
-# ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 
 # Arguments for the user of the container - these options have to be passed when building the image

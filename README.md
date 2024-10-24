@@ -27,24 +27,36 @@ echo "source $(pwd)/environment" >> ~/.bashrc
 If you have an Nvidia GPU, you can change the `Dockerfile` and `environment` file to use these. In the docker file line 8 was commented out, and line 45-47 was added. In the environment file the “docker run …” for Nvidia is commented out. 
 
 
+Log in to gitlab to access the Ari docker files. First log into gitlab and create a personal access token, then:
+```
+> docker login registry.gitlab.com
+```
+when prompted, enter your gitlab user name (email) and use the personal access token you just created as the password.
+
+
 Close & open a new terminal. The main idea now is that you can create a container that will mount one of the folders in your computer to the `src` folder of a catkin workspace in the container, and another of your folders to a folder I call `bridge` so that you can move files in and out of the container easily.
 
-I suggest you try this out by running (I'm using gallium here, but just change it for the other ones if that's what you need):
+First create the src and bridge folders
 ```
-cd ~
-mkdir -p container-name-container/src container-name-container/bridge
-make_container gallium container-name ~/container-name-container/src ~/container-name-container/bridge
+> mkdir -p ~/path/to/code/src ~/path/to/code/bridge
 ```
+
+
+Create the container (here the ros distro gaallium is used but just change it for the other ones if that's what you need):
+```
+> make_ari_container gallium container_name ~/path/to/code/src ~/path/to/code/bridge
+```
+
 
 You only have to run `make_container` the first time (minus if your container gets ruined, more on that later). From then on, to start it up again just run `start_container`:
 ```
-start_container noetic
-open_terminal noetic
+start_ari_container container_name
+open_ari_terminal container_name
 ```
 
-Now you'll be in a terminal inside your container. If you need more terminals, just open more terminals and run `open_terminal container-name`. 
+Now you'll be in a terminal inside your container. If you need more terminals, just open more terminals and run `open_terminal container_name`. 
 
-Anything you do to the `catkin_ws/src` and `bridge` folders in the container is also always available to you in your own folders `noetic-container/src` and `noetic-container/bridge`, and vice versa. Therfore you can run your editor of choice outside the Docker and just use the terminals to compile things.
+Anything you do to the `catkin_ws/src` and `bridge` folders in the container is also always available to you in your own folders `~/path/to/code/src` and `~/path/to/code/bridge`, and vice versa. Therfore you can run your editor of choice outside the Docker and just use the terminals to compile things.
 
 **SUPER MEGA WARNING**: The connection between the `src` folders and the `bridge` folders in your computer and in your container is total. **Any** change you make, regardless of it's on the container or your computer, happens on both. Something you delete is gone from both sides.
 
@@ -54,12 +66,12 @@ Anything you do to the `catkin_ws/src` and `bridge` folders in the container is 
 
 To stop a container, run:
 ```
-close_container container-name
+close_ari_container container-name
 ```
 
 To delete a container, run:
 ```
-delete_container container-name
+delete_ari_container container-name
 ```
 
 

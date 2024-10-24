@@ -2,10 +2,10 @@
 FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-development-ari-30-dev
 
 
-ENV DEBIAN_FRONTEND=noninteractive
+# ENV DEBIAN_FRONTEND=noninteractive
 
 # Set the environment variables for the nvidia runtime if creating container using nvidia-docker
-# ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 # Arguments for the user of the container - these options have to be passed when building the image
 ARG USERNAME
@@ -19,6 +19,29 @@ RUN apt update && apt install -y \
     python3-rosinstall-generator \
     python3-wstool \
     python3-rosdep \
+    python-rosinstall \
+    ros-noetic-desktop-full \
+    python-catkin-tools \
+    ros-noetic-joint-state-controller \
+    ros-noetic-twist-mux \
+    ros-noetic-ompl \
+    ros-noetic-controller-manager \
+    ros-noetic-moveit-core \
+    ros-noetic-moveit-ros-perception \
+    ros-noetic-moveit-ros-move-group \
+    ros-noetic-moveit-kinematics \
+    ros-noetic-moveit-ros-planning-interface \
+    ros-noetic-moveit-simple-controller-manager \
+    ros-noetic-moveit-planners-ompl \
+    ros-noetic-joy \
+    ros-noetic-joy-teleop \
+    ros-noetic-teleop-tools \
+    ros-noetic-control-toolbox \
+    ros-noetic-sound-play \
+    ros-noetic-navigation \
+    ros-noetic-depthimage-to-laserscan \
+    ros-noetic-moveit-commander \
+    
     build-essential
 
 ## Install software that is useful
@@ -40,13 +63,13 @@ RUN apt install -y \
     pal-gallium-pal-presentation-msgs
 
 ## Install python dependencies (this should move to a script)
-RUN pip3 install py_trees ikpy google-api-python-client mediapipe
-RUN pip3 install opencv-python
+# RUN pip3 install py_trees ikpy google-api-python-client mediapipe
+RUN pip3 install opencv-python scipy numpy matplotlib networkx
 
 # Intel: install Mesa libraries
-RUN apt-get update && \
-    apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+#     apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
+#     rm -rf /var/lib/apt/lists/*
 
 RUN rosdep init
 
@@ -82,3 +105,5 @@ RUN rosdep update
 WORKDIR "/home/$USERNAME"
 RUN mkdir -p catkin_ws/src
 RUN mkdir bridge
+
+
