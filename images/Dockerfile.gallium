@@ -19,9 +19,8 @@ RUN apt update && apt install -y \
     python3-rosinstall-generator \
     python3-wstool \
     python3-rosdep \
-    python-rosinstall \
+    python3-catkin-tools \
     ros-noetic-desktop-full \
-    python-catkin-tools \
     ros-noetic-joint-state-controller \
     ros-noetic-twist-mux \
     ros-noetic-ompl \
@@ -41,7 +40,6 @@ RUN apt update && apt install -y \
     ros-noetic-navigation \
     ros-noetic-depthimage-to-laserscan \
     ros-noetic-moveit-commander \
-    
     build-essential
 
 ## Install software that is useful
@@ -105,5 +103,3 @@ RUN rosdep update
 WORKDIR "/home/$USERNAME"
 RUN mkdir -p catkin_ws/src
 RUN mkdir bridge
-
-

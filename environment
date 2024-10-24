@@ -54,7 +54,7 @@ make_ari_container () {
     close_ari_container $CONTAINER_NAME
 }
 
-delete_container () {
+delete_ari_container () {
     CONTAINER_NAME=$1
     if [ "$(docker ps | grep $CONTAINER_NAME)" ]; then
         close_ari_container $CONTAINER_NAME
