@@ -1,9 +1,6 @@
 # Source the correct base image
 FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-development-ari-30-dev
 
-
-# ENV DEBIAN_FRONTEND=noninteractive
-
 # Set the environment variables for the nvidia runtime if creating container using nvidia-docker
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
@@ -12,92 +9,87 @@ ARG USERNAME
 ARG USERID
 ARG GROUPID
 
-## Install necessary software to build packages
-RUN apt update && apt install -y \
-    python3-rosdep \
-    python3-rosinstall \
-    python3-rosinstall-generator \
-    python3-wstool \
-    python3-rosdep \
-    python3-catkin-tools \
-    ros-noetic-desktop-full \
-    ros-noetic-joint-state-controller \
-    ros-noetic-twist-mux \
-    ros-noetic-ompl \
-    ros-noetic-controller-manager \
-    ros-noetic-moveit-core \
-    ros-noetic-moveit-ros-perception \
-    ros-noetic-moveit-ros-move-group \
-    ros-noetic-moveit-kinematics \
-    ros-noetic-moveit-ros-planning-interface \
-    ros-noetic-moveit-simple-controller-manager \
-    ros-noetic-moveit-planners-ompl \
-    ros-noetic-joy \
-    ros-noetic-joy-teleop \
-    ros-noetic-teleop-tools \
-    ros-noetic-control-toolbox \
-    ros-noetic-sound-play \
-    ros-noetic-navigation \
-    ros-noetic-depthimage-to-laserscan \
-    ros-noetic-moveit-commander \
-    build-essential
+## Setup the users
+# Properly setup the root password so that we have control to log in
+# and add user to sudoers with no password prompt
+RUN echo "root:root" | chpasswd && \
+    userdel user &&  \
+    groupadd -g $GROUPID -o $USERNAME && \
+    useradd -m -u $USERID -g $GROUPID -o -s /bin/bash $USERNAME && \
+    echo "$USERNAME:passwd" | chpasswd && \
+    adduser $USERNAME sudo && \
+    usermod -aG sudo $USERNAME && \
+    echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-## Install software that is useful
-RUN apt update && apt install -y \
-    nano \
-    vim \
-    git
 
-## Install dependencies for sw stack (this should move to a script)
-RUN apt install -y \
-    ros-noetic-hri \
-    ros-noetic-hri-msgs \
-    ros-noetic-hri-rviz \
-    ros-noetic-human-description \
-    ros-noetic-pyhri \
-    libopencv-dev \
-    python -m pip \
-    python3-tk \
-    pal-gallium-pal-presentation-msgs
 
-## Install python dependencies (this should move to a script)
-# RUN pip3 install py_trees ikpy google-api-python-client mediapipe
-RUN pip3 install opencv-python scipy numpy matplotlib networkx
+# Install Python dependencies
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip && \
+    python3 -m pip install --upgrade pip && \
+    pip3 install opencv-python matplotlib scipy numpy && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+## Install software that is useful and ros dependencies
+RUN apt-get update && apt-get install -y \
+    nano vim git curl \
+    python3-rosdep python3-rosinstall python3-rosinstall-generator \
+    python3-wstool python3-rosdep build-essential \
+    python3-catkin-tools python3-tk libopencv-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
+    # set up keys
+RUN apt-get update && apt-get install -y \
+ros-noetic-joint-state-controller ros-noetic-twist-mux ros-noetic-ompl \
+ros-noetic-controller-manager ros-noetic-moveit-core ros-noetic-moveit-ros-perception \
+ros-noetic-moveit-ros-move-group ros-noetic-moveit-kinematics ros-noetic-moveit-ros-planning-interface \
+ros-noetic-moveit-simple-controller-manager ros-noetic-moveit-planners-ompl ros-noetic-joy \
+ros-noetic-joy-teleop ros-noetic-teleop-tools ros-noetic-control-toolbox \
+ros-noetic-sound-play ros-noetic-navigation ros-noetic-depthimage-to-laserscan \
+ros-noetic-moveit-commander ros-noetic-slam-toolbox \
+ros-noetic-hri ros-noetic-hri-msgs ros-noetic-hri-rviz \
+ros-noetic-human-description ros-noetic-pyhri ros-noetic-audio-common-msgs \
+pal-gallium-pal-presentation-msgs && \
+apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # Intel: install Mesa libraries
 # RUN apt-get update && \
 #     apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
 #     rm -rf /var/lib/apt/lists/*
 
-RUN rosdep init
-
-## Setup the users
-
-# Properly setup the root password so that we have control to log in
-RUN echo "root:root" | chpasswd
-
-# Create the user and set it up
-RUN userdel user
-RUN groupadd -g $GROUPID -o $USERNAME
-RUN useradd -m -u $USERID -g $GROUPID -o -s /bin/bash $USERNAME
-RUN echo "$USERNAME:passwd" | chpasswd
-RUN adduser $USERNAME sudo
-
-# Add user to sudoers with no password prompt
-RUN usermod -aG sudo $USERNAME
-RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 ## Setup the entrypoint
-RUN echo "source /opt/pal/gallium/setup.bash" >> /home/$USERNAME/.bashrc
-RUN echo "PS1=\"(gallium) \$PS1\"" >> /home/$USERNAME/.bashrc
-RUN echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
+RUN echo "source /opt/ros/gallium/setup.bash" >> /home/$USERNAME/.bashrc && \ 
+    echo "PS1=\"(gallium) \$PS1\"" >> /home/$USERNAME/.bashrc && \
+    echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
+
 COPY bash_convenience /home/$USERNAME/.bash_convenience
 
-# Change to the user to run non-root tasks
-USER $USERNAME
 
-# Update rosdep now that we are not in root
+
+# Run rosdep initialization and update
+RUN rosdep init
 RUN rosdep update
+
+
+# Change to the specified user for non-root tasks
+USER $USERNAME
+WORKDIR "/home/$USERNAME"
+
+# Setup the simulation workspace
+RUN mkdir ari_public_ws
+WORKDIR "/home/$USERNAME/ari_public_ws"
+
+# Download and set up ari simulation
+RUN curl -o ari_public-noetic.rosinstall https://raw.githubusercontent.com/pal-robotics/ari_tutorials/master/ari_public-noetic.rosinstall && \
+    rosinstall src /opt/ros/noetic ari_public-noetic.rosinstall
+
+# install dependencies
+# RUN rosdep update && rosdep install --from-paths src --ignore-src --rosdistro noetic --skip-keys="opencv2 opencv2-nonfree pal_laser_filters speed_limit_node sensor_to_cloud hokuyo_node libdw-dev python-graphitesend-pip python-statsd pal_filters pal_vo_server pal_usb_utils pal_pcl pal_pcl_points_throttle_and_filter pal_karto pal_local_joint_control camera_calibration_files pal_startup_msgs pal-orbbec-openni2 dummy_actuators_manager pal_local_planner gravity_compensation_controller current_limit_controller dynamic_footprint dynamixel_cpp tf_lookup opencv3 librealsense2-dev librealsense2-dkms hey5_transmissions ydlidar_ros_driver python-pyside orocos_kdl ros-noetic-spatio-temporal-voxel-layer ros-noetic-teb-local-planner ros-noetic-ddynamic-reconfigure ros-noetic-librealsense2 ros-noetic-octomap-server ros-noetic-four-wheel-steering-msgs ros-noetic-urdf-geometry-parser ros-noetic-people-msgs" -y -r
+
 
 # Setup the workspace
 WORKDIR "/home/$USERNAME"

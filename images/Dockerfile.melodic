@@ -1,5 +1,5 @@
 # Source the correct base image
-FROM osrf/ros:noetic-desktop-full
+FROM osrf/ros:melodic-desktop-full
 
 # Arguments for the user of the container - these options have to be passed when building the image
 ARG USERNAME
@@ -21,8 +21,11 @@ RUN echo "root:root" | chpasswd && \
 # Install Python dependencies
 RUN apt-get update && apt-get install -y \
     python3 python3-pip && \
-    python3 -m pip install --upgrade pip  && \
+    python3 -m pip install --upgrade pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN echo "alias python=python3" >> /home/$USERNAME/.bashrc && \
+    echo "alias pip=pip3" >> /home/$USERNAME/.bashrc
 
 RUN pip install matplotlib scipy numpy opencv-python --verbose
 
@@ -30,42 +33,40 @@ RUN pip install matplotlib scipy numpy opencv-python --verbose
 ## Install software that is useful and ros dependencies
 RUN apt-get update && apt-get install -y \
     nano vim git curl \
-    python3-rosdep python3-rosinstall python3-rosinstall-generator \
-    python3-wstool python3-rosdep build-essential \
-    python3-catkin-tools python3-tk libopencv-dev && \
+    python-rosdep python-rosinstall python-rosinstall-generator \
+    python-wstool python-rosdep build-essential \
+    python-catkin-tools python-tk libopencv-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-
-# set up keys
-RUN apt-get update && apt-get install -y \
-    ros-noetic-joint-state-controller ros-noetic-twist-mux ros-noetic-ompl \
-    ros-noetic-controller-manager ros-noetic-moveit-core ros-noetic-moveit-ros-perception \
-    ros-noetic-moveit-ros-move-group ros-noetic-moveit-kinematics ros-noetic-moveit-ros-planning-interface \
-    ros-noetic-moveit-simple-controller-manager ros-noetic-moveit-planners-ompl ros-noetic-joy \
-    ros-noetic-joy-teleop ros-noetic-teleop-tools ros-noetic-control-toolbox \
-    ros-noetic-sound-play ros-noetic-navigation ros-noetic-depthimage-to-laserscan \
-    ros-noetic-moveit-commander && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
-    ros-noetic-ddynamic-reconfigure ros-noetic-urdf-geometry-parser ros-noetic-four-wheel-steering-msgs \  
-    ros-noetic-realsense2-camera ros-noetic-people-msgs
-    ros-noetic-slam-toolbox ros-noetic-pointcloud-to-laserscan\
-    ros-noetic-hri ros-noetic-hri-msgs ros-noetic-hri-rviz \
-    ros-noetic-human-description ros-noetic-pyhri ros-noetic-audio-common-msgs && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+ros-melodic-joint-state-controller ros-melodic-twist-mux ros-melodic-ompl \
+ros-melodic-controller-manager ros-melodic-moveit-core ros-melodic-moveit-ros-perception \
+ros-melodic-moveit-ros-move-group ros-melodic-moveit-kinematics ros-melodic-moveit-ros-planning-interface \
+ros-melodic-moveit-simple-controller-manager ros-melodic-moveit-planners-ompl ros-melodic-joy \
+ros-melodic-joy-teleop ros-melodic-teleop-tools ros-melodic-control-toolbox \
+ros-melodic-sound-play ros-melodic-navigation ros-melodic-depthimage-to-laserscan \
+ros-melodic-moveit-commander && \
+apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+ros-melodic-slam-toolbox ros-melodic-pointcloud-to-laserscan \
+ros-melodic-human-description ros-melodic-audio-common-msgs && \
+apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 # Intel: install Mesa libraries
-# RUN apt-get update && apt-get -y install \
-#     libgl1-mesa-glx libgl1-mesa-dri && \
+# RUN apt-get update && \
+#     apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
 #     rm -rf /var/lib/apt/lists/*
 
+
+
 ## Setup the entrypoint
-RUN echo "source /opt/ros/noetic/setup.bash" >> /home/$USERNAME/.bashrc && \ 
-    echo "PS1=\"(noetic) \$PS1\"" >> /home/$USERNAME/.bashrc && \
-    echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
+RUN echo "source /opt/ros/melodic/setup.bash" >> /home/$USERNAME/.bashrc
+RUN echo "PS1=\"(melodic) \$PS1\"" >> /home/$USERNAME/.bashrc
+RUN echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
 COPY bash_convenience /home/$USERNAME/.bash_convenience
 
 # Run rosdep initialization and update
@@ -90,4 +91,4 @@ RUN curl -o ari_public-noetic.rosinstall https://raw.githubusercontent.com/pal-r
 # Setup the workspace
 WORKDIR "/home/$USERNAME"
 RUN mkdir -p catkin_ws/src
-RUN mkdir bridge
+RUN mkdir bridgerosinstall src /opt/ros/noetic ari_public-noetic.rosinstall
