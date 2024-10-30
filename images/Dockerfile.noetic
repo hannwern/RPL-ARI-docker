@@ -24,7 +24,7 @@ RUN apt-get update && apt-get install -y \
     python3 -m pip install --upgrade pip  && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install matplotlib scipy numpy opencv-python --verbose
+RUN pip install matplotlib scipy numpy shapely opencv-python --verbose
 
 
 ## Install software that is useful and ros dependencies

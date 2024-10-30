@@ -24,18 +24,15 @@ RUN apt-get update && apt-get install -y \
     python3 -m pip install --upgrade pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN echo "alias python=python3" >> /home/$USERNAME/.bashrc && \
-    echo "alias pip=pip3" >> /home/$USERNAME/.bashrc
-
-RUN pip install matplotlib scipy numpy opencv-python --verbose
+RUN pip install matplotlib scipy numpy opencv-python shapely --verbose
 
 
 ## Install software that is useful and ros dependencies
 RUN apt-get update && apt-get install -y \
     nano vim git curl \
-    python-rosdep python-rosinstall python-rosinstall-generator \
-    python-wstool python-rosdep build-essential \
-    python-catkin-tools python-tk libopencv-dev && \
+    python3-rosdep python3-rosinstall python3-rosinstall-generator \
+    python3-wstool python3-rosdep build-essential \
+    python3-catkin-tools python3-tk libopencv-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
