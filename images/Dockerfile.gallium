@@ -2,7 +2,7 @@
 FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-development-ari-30-dev
 
 # Set the environment variables for the nvidia runtime if creating container using nvidia-docker
-ENV NVIDIA_DRIVER_CAPABILITIES=all
+# ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 # Arguments for the user of the container - these options have to be passed when building the image
 ARG USERNAME
@@ -56,12 +56,12 @@ apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
 # Intel: install Mesa libraries
-# RUN apt-get update && \
-#     apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
-#     rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
+    rm -rf /var/lib/apt/lists/*
 
 
-## Setup the entrypoint
+# Setup the entrypoint
 RUN echo "source /opt/ros/gallium/setup.bash" >> /home/$USERNAME/.bashrc && \ 
     echo "PS1=\"(gallium) \$PS1\"" >> /home/$USERNAME/.bashrc && \
     echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
@@ -79,19 +79,6 @@ RUN rosdep update
 USER $USERNAME
 WORKDIR "/home/$USERNAME"
 
-# Setup the simulation workspace
-RUN mkdir ari_public_ws
-WORKDIR "/home/$USERNAME/ari_public_ws"
-
-# Download and set up ari simulation
-RUN curl -o ari_public-noetic.rosinstall https://raw.githubusercontent.com/pal-robotics/ari_tutorials/master/ari_public-noetic.rosinstall && \
-    rosinstall src /opt/ros/noetic ari_public-noetic.rosinstall
-
-# install dependencies
-# RUN rosdep update && rosdep install --from-paths src --ignore-src --rosdistro noetic --skip-keys="opencv2 opencv2-nonfree pal_laser_filters speed_limit_node sensor_to_cloud hokuyo_node libdw-dev python-graphitesend-pip python-statsd pal_filters pal_vo_server pal_usb_utils pal_pcl pal_pcl_points_throttle_and_filter pal_karto pal_local_joint_control camera_calibration_files pal_startup_msgs pal-orbbec-openni2 dummy_actuators_manager pal_local_planner gravity_compensation_controller current_limit_controller dynamic_footprint dynamixel_cpp tf_lookup opencv3 librealsense2-dev librealsense2-dkms hey5_transmissions ydlidar_ros_driver python-pyside orocos_kdl ros-noetic-spatio-temporal-voxel-layer ros-noetic-teb-local-planner ros-noetic-ddynamic-reconfigure ros-noetic-librealsense2 ros-noetic-octomap-server ros-noetic-four-wheel-steering-msgs ros-noetic-urdf-geometry-parser ros-noetic-people-msgs" -y -r
-
-
 # Setup the workspace
-WORKDIR "/home/$USERNAME"
 RUN mkdir -p catkin_ws/src
 RUN mkdir bridge
