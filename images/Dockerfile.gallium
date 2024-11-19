@@ -37,8 +37,11 @@ RUN apt-get update && apt-get install -y \
     nano vim git curl \
     python3-rosdep python3-rosinstall python3-rosinstall-generator \
     python3-wstool python3-rosdep build-essential \
-    python3-catkin-tools python3-tk libopencv-dev && \
+    python3-catkin-tools python3-tk \
+    libopencv-dev libomp-dev libdlib-dev libboost-all-dev coinor-libcoinutils-dev coinor-libosi-dev coinor-libclp-dev coinor-libcgl-dev coinor-libcbc-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
 
 
     # set up keys
@@ -52,7 +55,8 @@ ros-noetic-sound-play ros-noetic-navigation ros-noetic-depthimage-to-laserscan \
 ros-noetic-moveit-commander ros-noetic-slam-toolbox ros-noetic-aruco-msgs \
 ros-noetic-hri ros-noetic-hri-msgs ros-noetic-hri-rviz \
 ros-noetic-human-description ros-noetic-pyhri ros-noetic-audio-common-msgs \
-pal-gallium-pal-presentation-msgs && \
+ros-noetic-cob-map-accessibility-analysis ros-noetic-opengm ros-noetic-libdlib \ 
+pal-gallium-pal-presentation-msgs pal-gallium-pal-navigation-msgs && \
 apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
