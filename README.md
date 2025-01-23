@@ -43,20 +43,20 @@ when prompted, enter your gitlab user name (email) and use the personal access t
 
 Next, create the container (here the ros distro gallium is used but just change it for the other ones (noetic) if that's what you need). 
 ```
-> make_container gallium container_name ~/path/to/code/src ~/path/to/code/bridge
+> create_container gallium container_name ~/path/to/code/src ~/path/to/code/bridge
 ```
 
-You only have to run `make_container` the first time (minus if your container gets ruined, more on that later). From then on, to start it up again just run `start_container`:
+You only have to run `create_container` once. From then on, to start it up again just run `start_container`:
 ```
 start_container container_name
 open_terminal container_name
 ```
 
-Now you'll be in a terminal inside your container. If you need more terminals, just open more terminals and run `open_terminal container_name`. 
+Now you'll be in a terminal inside your container. If you need more, just open more terminals and run `open_terminal container_name`. 
 
 Anything you do to the `catkin_ws/src` and `bridge` folders in the container is also always available to you in your own folders `~/path/to/code/src` and `~/path/to/code/bridge`, and vice versa. Therfore you can run your editor of choice outside the Docker and just use the terminals to compile things.
 
-**SUPER MEGA WARNING**: The connection between the `src` folders and the `bridge` folders in your computer and in your container is total. **Any** change you make, regardless of it's on the container or your computer, happens on both. Something you delete is gone from both sides.
+**SUPER MEGA WARNING**: The connection between the `src` folders and the `bridge` folders in your computer and in your container is total. **Any** change you make, regardless of if it's on the container or your computer, happens on both. Something you delete is gone from both sides.
 
 
 **WARNING**: Only the folders `catkin_ws/src` and `bridge` are safe, since mounted outside the container. Anything else that is not in these folders is lost by deleting the container, so be careful when doing this that you've saved everything you don't want to lose in one of these folders.
@@ -102,6 +102,9 @@ Masters will likely be the ARI control computer, which has a hostname if you hav
 ```
 > ros_slave ari-30c # For the ARI team
 ```
+
+Whatever ROS project you run now in this "slave" terminal will run on Ari.
+
 
 ## What's in the container
 
