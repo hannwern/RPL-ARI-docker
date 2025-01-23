@@ -2,7 +2,7 @@
 FROM registry.gitlab.com/pal-robotics/ari-0622/dockers/pal-gallium-pal-metapkg-development-ari-30-dev
 
 # Set the environment variables for the nvidia runtime if creating container using nvidia-docker
-# ENV NVIDIA_DRIVER_CAPABILITIES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=all
 
 # Arguments for the user of the container - these options have to be passed when building the image
 ARG USERNAME
@@ -22,14 +22,13 @@ RUN echo "root:root" | chpasswd && \
     echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 
-
 # Install Python dependencies
 RUN apt-get update && apt-get install -y \
     python3 python3-pip && \
     python3 -m pip install --upgrade pip && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip install opencv-python matplotlib scipy numpy shapely networkx\
+RUN pip install opencv-python matplotlib scipy numpy shapely networkx 
 
 
 ## Install software that is useful and ros dependencies
@@ -42,29 +41,20 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-
-
-    # set up keys
+# get some ros packages
 RUN apt-get update && apt-get install -y \
-ros-noetic-joint-state-controller ros-noetic-twist-mux ros-noetic-ompl \
-ros-noetic-controller-manager ros-noetic-moveit-core ros-noetic-moveit-ros-perception \
-ros-noetic-moveit-ros-move-group ros-noetic-moveit-kinematics ros-noetic-moveit-ros-planning-interface \
-ros-noetic-moveit-simple-controller-manager ros-noetic-moveit-planners-ompl ros-noetic-joy \
-ros-noetic-joy-teleop ros-noetic-teleop-tools ros-noetic-control-toolbox \
-ros-noetic-sound-play ros-noetic-navigation ros-noetic-depthimage-to-laserscan \
-ros-noetic-moveit-commander ros-noetic-slam-toolbox ros-noetic-aruco-msgs \
-ros-noetic-hri ros-noetic-hri-msgs ros-noetic-hri-rviz \
-ros-noetic-human-description ros-noetic-pyhri ros-noetic-audio-common-msgs \
-ros-noetic-cob-map-accessibility-analysis ros-noetic-opengm ros-noetic-libdlib \ 
-pal-gallium-pal-presentation-msgs pal-gallium-pal-navigation-msgs && \
-apt-get clean && rm -rf /var/lib/apt/lists/*
-
-
-# Intel: install Mesa libraries
-RUN apt-get update && \
-    apt-get -y install libgl1-mesa-glx libgl1-mesa-dri && \
-    rm -rf /var/lib/apt/lists/*
-
+    ros-noetic-joint-state-controller ros-noetic-twist-mux ros-noetic-ompl \
+    ros-noetic-controller-manager ros-noetic-moveit-core ros-noetic-moveit-ros-perception \
+    ros-noetic-moveit-ros-move-group ros-noetic-moveit-kinematics ros-noetic-moveit-ros-planning-interface \
+    ros-noetic-moveit-simple-controller-manager ros-noetic-moveit-planners-ompl ros-noetic-joy \
+    ros-noetic-joy-teleop ros-noetic-teleop-tools ros-noetic-control-toolbox \
+    ros-noetic-sound-play ros-noetic-navigation ros-noetic-depthimage-to-laserscan \
+    ros-noetic-moveit-commander ros-noetic-slam-toolbox ros-noetic-aruco-msgs \
+    ros-noetic-hri ros-noetic-hri-msgs ros-noetic-hri-rviz \
+    ros-noetic-human-description ros-noetic-pyhri ros-noetic-audio-common-msgs \
+    ros-noetic-cob-map-accessibility-analysis ros-noetic-opengm ros-noetic-libdlib \ 
+    pal-gallium-pal-presentation-msgs pal-gallium-pal-navigation-msgs && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Setup the entrypoint
 RUN echo "source /opt/ros/gallium/setup.bash" >> /home/$USERNAME/.bashrc && \ 
@@ -72,8 +62,6 @@ RUN echo "source /opt/ros/gallium/setup.bash" >> /home/$USERNAME/.bashrc && \
     echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
 
 COPY bash_convenience /home/$USERNAME/.bash_convenience
-
-
 
 # Run rosdep initialization and update
 RUN rosdep init
@@ -88,3 +76,4 @@ RUN rosdep update
 # Setup the workspace
 RUN mkdir -p catkin_ws/src
 RUN mkdir bridge
+

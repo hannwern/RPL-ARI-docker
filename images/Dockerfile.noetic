@@ -48,6 +48,7 @@ RUN apt-get update && apt-get install -y \
     ros-noetic-moveit-commander && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+
 RUN apt-get update && apt-get install -y \
     ros-noetic-ddynamic-reconfigure ros-noetic-urdf-geometry-parser ros-noetic-four-wheel-steering-msgs \  
     ros-noetic-realsense2-camera ros-noetic-people-msgs
@@ -57,23 +58,22 @@ RUN apt-get update && apt-get install -y \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-# Intel: install Mesa libraries
-RUN apt-get update && apt-get -y install \
-    libgl1-mesa-glx libgl1-mesa-dri && \
-    rm -rf /var/lib/apt/lists/*
-
 ## Setup the entrypoint
 RUN echo "source /opt/ros/noetic/setup.bash" >> /home/$USERNAME/.bashrc && \ 
     echo "PS1=\"(noetic) \$PS1\"" >> /home/$USERNAME/.bashrc && \
     echo "source .bash_convenience" >> /home/$USERNAME/.bashrc
+
 COPY bash_convenience /home/$USERNAME/.bash_convenience
 
 # Run rosdep initialization and update
-RUN rosdep update
+RUN rosdep init
 
 # Change to the specified user for non-root tasks
 USER $USERNAME
 WORKDIR "/home/$USERNAME"
+
+RUN rosdep update
+
 
 # Setup the workspace
 RUN mkdir -p catkin_ws/src
